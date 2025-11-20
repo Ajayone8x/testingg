@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Watch live streams with high quality playback">
+    <meta name="theme-color" content="#111827">
     <title>Live Stream Player</title>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/shaka-player.ui.min.js" crossorigin="anonymous"></script>
@@ -18,31 +20,35 @@
 
     <style>
         :root {
-            /* Premium blue theme */
-            --bg-color: #0b1830;
-            --header-pill: linear-gradient(180deg,#0d2a5a,#0a1f44);
-            --panel-bg: linear-gradient(180deg,#0d2a5a,#0a224c);
-            --panel-border: #153568;
-            --accent: #1e78ff;
-            --accent-2: #78a6ff;
-            --text-light: #eaf2ff;
-            --text-muted: #b9cae6;
-            --card-bg: #0f223f;
-            --border-color: #153568;
-            --popup-bg: #0f223f;
-            --popup-shadow-color: rgba(30, 120, 255, 0.35);
-            --danger: #e50914;
+            /* Minimalist clean theme */
+            --bg-color: #111827;
+            --surface-bg: #1f2937;
+            --panel-border: #374151;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --text-primary: #f9fafb;
+            --text-secondary: #e5e7eb;
+            --text-muted: #9ca3af;
+            --danger: #ef4444;
+            --success: #10b981;
+            --shadow-sm: rgba(0, 0, 0, 0.1);
+            --shadow-md: rgba(0, 0, 0, 0.2);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
         body {
             font-family: 'Poppins', sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-light);
+            color: var(--text-primary);
             display: flex;
             justify-content: center;
             align-items: flex-start;
             min-height: 100vh;
             padding: 1rem;
+            line-height: 1.6;
+        }
+        @media (max-width: 768px) {
+            body { padding: 0.75rem; font-size: 14px; }
         }
         .container {
             width: 100%;
@@ -51,49 +57,72 @@
             transform: translateY(20px);
             animation: fadeIn 0.5s ease-out forwards;
         }
+        @media (min-width: 1200px) {
+            .container { max-width: 1000px; }
+        }
+        @media (max-width: 480px) {
+            .container { max-width: 100%; }
+        }
         @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
         .stream-header {
-            background: var(--header-pill);
+            background: var(--surface-bg);
             border: 1px solid var(--panel-border);
-            padding: 0.9rem 1.25rem;
-            border-radius: 999px;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 0 auto 1rem;
+            margin: 0 auto 1.5rem;
             max-width: 900px;
-            box-shadow: 0 8px 28px rgba(10,31,68,0.35);
+            box-shadow: 0 2px 8px var(--shadow-sm);
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
-        .stream-header h1 { font-size: 1.1rem; font-weight: 600; color: var(--text-light); letter-spacing: .3px; }
+        @media (max-width: 480px) {
+            .stream-header { padding: 0.875rem 1rem; margin-bottom: 1rem; }
+        }
+        .stream-header h1 { font-size: 1.125rem; font-weight: 600; color: var(--text-primary); text-align: center; }
+        @media (max-width: 480px) {
+            .stream-header h1 { font-size: 1rem; }
+        }
         .live-badge {
-            background: radial-gradient(100% 100% at 50% 0%, #ff3b3b 0%, #ba1a1a 100%);
+            background: var(--danger);
             color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
+            padding: 0.375rem 0.875rem;
+            border-radius: 6px;
             font-size: 0.75rem;
-            font-weight: 700;
+            font-weight: 600;
             display: inline-flex;
             align-items: center;
-            gap: 0.4rem;
-            margin-left: .6rem;
-            animation: pulse 1.5s infinite;
+            gap: 0.5rem;
+            margin-left: 0.75rem;
+        }
+        @media (max-width: 480px) {
+            .live-badge { padding: 0.3rem 0.7rem; font-size: 0.7rem; margin-left: 0.5rem; }
+        }
+        .live-badge i {
+            animation: pulse 2s ease-in-out infinite;
         }
         @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(229, 9, 20, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(229, 9, 20, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(229, 9, 20, 0); }
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
         }
         #player-container {
             width: 100%;
-            height: 52vh;
-            max-height: 660px;
+            aspect-ratio: 16 / 9;
+            max-height: 600px;
             background-color: #000;
-            box-shadow: 0 18px 38px rgba(10,31,68,0.45);
-            border-radius: 14px;
+            box-shadow: 0 4px 12px var(--shadow-md);
+            border-radius: 12px;
             overflow: hidden;
             border: 1px solid var(--panel-border);
             position: relative;
-            transition: all 0.3s ease;
+        }
+        @media (max-width: 768px) {
+            #player-container { border-radius: 8px; max-height: none; }
+        }
+        @media (max-width: 480px) {
+            #player-container { border-radius: 6px; }
         }
         /* CSS FROM NEW FILE: Hide shaka spinner completely */
         .shaka-spinner-container,
@@ -104,25 +133,37 @@
             opacity: 0 !important;
         }
         .grid-panels { display: grid; gap: 1rem; grid-template-columns: 1fr; }
-        @media (min-width: 900px) { .grid-panels { grid-template-columns: 1fr 1fr; } }
+        @media (min-width: 768px) { .grid-panels { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 480px) { .grid-panels { gap: 0.75rem; } }
         .info-card {
-            background: var(--panel-bg);
+            background: var(--surface-bg);
             border: 1px solid var(--panel-border);
-            border-radius: 14px;
-            padding: 1.25rem;
-            margin-top: 1rem;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(10,31,68,0.35);
+            box-shadow: 0 2px 8px var(--shadow-sm);
+        }
+        @media (max-width: 768px) {
+            .info-card { padding: 1.25rem; margin-top: 1rem; }
+        }
+        @media (max-width: 480px) {
+            .info-card { padding: 1rem; border-radius: 8px; }
         }
         .info-card h2 {
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 600;
             margin-bottom: 1rem;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            color: var(--text-muted);
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        @media (max-width: 480px) {
+            .info-card h2 { font-size: 0.8rem; gap: 0.4rem; }
         }
         .action-button {
             display: inline-flex;
@@ -130,68 +171,102 @@
             justify-content: center;
             gap: 0.75rem;
             width: 100%;
-            padding: 0.8rem 1rem;
-            border-radius: 10px;
-            background: linear-gradient(180deg, var(--accent), var(--accent-2));
-            color: #02122b;
+            padding: 0.875rem 1.25rem;
+            border-radius: 8px;
+            background: var(--accent);
+            color: white;
             font-weight: 600;
+            font-size: 0.95rem;
             text-decoration: none;
             border: none;
             cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            min-height: 44px;
+        }
+        @media (max-width: 480px) {
+            .action-button { padding: 0.95rem 1rem; font-size: 0.9rem; }
         }
         .action-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px var(--popup-shadow-color);
+            background: var(--accent-hover);
+            transform: translateY(-1px);
         }
-        .action-button.copied { background: linear-gradient(90deg, #22c55e, #a5f3ac); color: #05230f; }
+        .action-button.copied { background: var(--success); }
         .back-link {
             display: inline-block;
             width: 100%;
             text-align: center;
-            margin-top: 1.5rem;
+            margin-top: 2rem;
             color: var(--text-muted);
             text-decoration: none;
-            padding: 0.5rem;
+            padding: 0.75rem;
             border-radius: 8px;
-            transition: background-color 0.2s ease;
+            font-size: 0.9rem;
+            transition: color 0.2s ease;
+            min-height: 44px;
         }
-        .back-link:hover { background-color: var(--card-bg); color: var(--text-light); }
+        @media (max-width: 480px) {
+            .back-link { margin-top: 1.5rem; font-size: 0.85rem; }
+        }
+        .back-link:hover { color: var(--text-secondary); }
         .error-message {
              text-align: center;
-             padding: 4rem 1rem;
-             background-color: var(--card-bg);
-             border: 1px solid var(--border-color);
+             padding: 4rem 2rem;
+             background-color: var(--surface-bg);
+             border: 1px solid var(--panel-border);
              border-radius: 12px;
         }
-        .error-message h2 { color: var(--danger); font-size: 1.5rem; margin-bottom: 0.5rem; }
+        @media (max-width: 480px) {
+            .error-message { padding: 3rem 1.5rem; border-radius: 8px; }
+        }
+        .error-message h2 { color: var(--danger); font-size: 1.5rem; margin-bottom: 1rem; }
+        @media (max-width: 480px) {
+            .error-message h2 { font-size: 1.25rem; }
+        }
+        .error-message p { color: var(--text-secondary); }
         .telegram-popup {
             position: fixed; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            background: var(--popup-bg); color: var(--text-light);
-            padding: 30px 20px; border-radius: 12px;
-            box-shadow: 0 0 50px 10px var(--popup-shadow-color);
+            background: var(--surface-bg); color: var(--text-primary);
+            padding: 2rem 1.5rem; border-radius: 12px;
+            box-shadow: 0 8px 32px var(--shadow-md);
             z-index: 10000; text-align: center;
-            width: 90%; max-width: 350px;
-            display: none; border: 1px solid var(--primary-red-dark);
+            width: 90%; max-width: 380px;
+            display: none; border: 1px solid var(--panel-border);
             animation: popIn 0.3s ease-out forwards;
         }
+        @media (max-width: 480px) {
+            .telegram-popup { padding: 1.5rem 1.25rem; max-width: 340px; border-radius: 10px; }
+        }
         @keyframes popIn {
-            from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
             to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         }
-        .telegram-popup h2 { margin-top: 0; color: var(--primary-red); font-size: 1.5rem; margin-bottom: 0.5rem; }
-        .telegram-popup p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem; }
-        .telegram-popup button {
-            width: 100%; padding: 12px;
-            margin-top: 12px; font-size: 1rem;
-            border: none; border-radius: 6px;
-            cursor: pointer; font-weight: 600;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        .telegram-popup h2 { margin-top: 0; color: var(--text-primary); font-size: 1.375rem; margin-bottom: 0.75rem; }
+        @media (max-width: 480px) {
+            .telegram-popup h2 { font-size: 1.2rem; }
         }
-        .telegram-popup button:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); }
-        .telegram-popup .join-btn { background: linear-gradient(90deg, var(--primary-red), var(--primary-red-dark)); color: white; }
-        .telegram-popup .joined-btn { background-color: var(--border-color); color: var(--text-light); }
+        .telegram-popup p { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.5; }
+        @media (max-width: 480px) {
+            .telegram-popup p { font-size: 0.85rem; margin-bottom: 1.25rem; }
+        }
+        .telegram-popup .popup-button {
+            width: 100%; padding: 0.875rem;
+            margin-top: 0.75rem; font-size: 0.95rem;
+            border: none; border-radius: 8px;
+            cursor: pointer; font-weight: 600;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            text-decoration: none;
+            display: inline-block;
+            min-height: 44px;
+        }
+        @media (max-width: 480px) {
+            .telegram-popup .popup-button { padding: 0.95rem; font-size: 0.9rem; }
+        }
+        .telegram-popup .popup-button:hover { transform: translateY(-1px); }
+        .telegram-popup .join-btn { background: var(--accent); color: white; }
+        .telegram-popup .join-btn:hover { background: var(--accent-hover); }
+        .telegram-popup .joined-btn { background-color: var(--panel-border); color: var(--text-primary); }
+        .telegram-popup .joined-btn:hover { background-color: #4b5563; }
         @media (max-width: 480px) {
             body { padding: 0.5rem; }
             .telegram-popup { padding: 20px 15px; }
@@ -202,11 +277,11 @@
     <main class="container">
         <div id="stream-content"></div>
     </main>
-    <div class="telegram-popup" id="telegramPopup">
-        <h2><i class="fa-brands fa-telegram"></i> Support Us!</h2>
+    <div class="telegram-popup" id="telegramPopup" role="dialog" aria-labelledby="popup-title" aria-modal="true">
+        <h2 id="popup-title"><i class="fa-brands fa-telegram" aria-hidden="true"></i> Support Us!</h2>
         <p>Join our Telegram channel <strong>CricketWithAJ</strong> for instant updates, highlights, and exclusive links.</p>
-        <a href="https://t.me/+e9BLe1TuBBIxN2U1" target="_blank" rel="noopener"><button class="join-btn">Join Now</button></a>
-        <button class="joined-btn" onclick="document.getElementById('telegramPopup').style.display='none';">Already Joined</button>
+        <a href="https://t.me/+e9BLe1TuBBIxN2U1" target="_blank" rel="noopener noreferrer" class="popup-button join-btn">Join Now</a>
+        <button class="popup-button joined-btn" onclick="document.getElementById('telegramPopup').style.display='none';" aria-label="Close popup">Already Joined</button>
     </div>
 
     <script>
@@ -226,7 +301,7 @@
 
             try {
                 // Step 1: Fetch the new json file
-                const response = await fetch('https://raw.githubusercontent.com/Cricketstan/Allrounder-/refs/heads/main/id.json');
+                const response = await fetch('https://raw.githubusercontent.com/Ajayone8x/Alive/refs/heads/main/streams.json');
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -236,11 +311,12 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 const streamId = urlParams.get('id');
                 
-                // --- LOGIC UPDATED FOR NEW JSON STRUCTURE ---
-                // Find the stream object in the 'iframes' array by its 'id'
-                const streamData = streams.iframes.find(stream => stream.id === streamId);
+                // Get the stream object using the id as key
+                const streamData = streams[streamId];
                 
                 if (streamData) {
+                    // Add the id to streamData for compatibility
+                    streamData.id = streamId;
                     document.title = `${streamData.name} // Live Stream`;
 
                     if (streamData.type === 'iframe') {
@@ -265,7 +341,7 @@
         function renderIframeUI(data) {
             const contentDiv = document.getElementById('stream-content');
             contentDiv.innerHTML = `
-                <div class="stream-header"><h1>${data.name}</h1><span class="live-badge"><i class="fa-solid fa-circle"></i> LIVE</span></div>
+                <div class="stream-header"><h1>${data.name}</h1><span class="live-badge" role="status" aria-live="polite"><i class="fa-solid fa-circle" aria-hidden="true"></i> LIVE</span></div>
                 <div id="player-container">
                     <iframe 
                         src="${data.iframeSrc}" 
@@ -275,10 +351,10 @@
                     </iframe>
                 </div>
                 <div class="grid-panels">
-                    <div class="info-card"><h2><i class="fa-solid fa-bell"></i> Follow us for Updates!</h2><a href="https://t.me/+e9BLe1TuBBIxN2U1" target="_blank" rel="noopener" class="action-button"><i class="fa-brands fa-telegram"></i> Click Here To Join Telegram</a></div>
-                    <div class="info-card"><h2><i class="fa-solid fa-link"></i> Copy Link & Share</h2><button class="action-button" id="shareButton"><i class="fa-solid fa-share-nodes"></i> Click Here To Share This Page Link</button></div>
+                    <div class="info-card"><h2><i class="fa-solid fa-bell" aria-hidden="true"></i> Follow us for Updates!</h2><a href="https://t.me/+e9BLe1TuBBIxN2U1" target="_blank" rel="noopener noreferrer" class="action-button"><i class="fa-brands fa-telegram" aria-hidden="true"></i> Join Telegram</a></div>
+                    <div class="info-card"><h2><i class="fa-solid fa-link" aria-hidden="true"></i> Copy Link & Share</h2><button class="action-button" id="shareButton" aria-label="Copy page link to clipboard"><i class="fa-solid fa-share-nodes" aria-hidden="true"></i> Share Link</button></div>
                 </div>
-                <a href="#" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to All Streams</a>
+                <a href="./" class="back-link"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back to All Streams</a>
             `;
             document.getElementById('shareButton').addEventListener('click', copyAndShare);
         }
@@ -287,17 +363,17 @@
         function renderPlayerUI(data) {
             const contentDiv = document.getElementById('stream-content');
             contentDiv.innerHTML = `
-                <div class="stream-header"><h1>${data.name}</h1><span class="live-badge"><i class="fa-solid fa-circle"></i> LIVE</span></div>
+                <div class="stream-header"><h1>${data.name}</h1><span class="live-badge" role="status" aria-live="polite"><i class="fa-solid fa-circle" aria-hidden="true"></i> LIVE</span></div>
                 
                 <div id="player-container" data-shaka-player-container>
                     <video id="video-player" style="width:100%;height:100%;" autoplay playsinline preload="auto" data-shaka-player></video>
                 </div>
 
                 <div class="grid-panels">
-                    <div class="info-card"><h2><i class="fa-solid fa-bell"></i> Follow us for Updates!</h2><a href="https://t.me/+e9BLe1TuBBIxN2U1" target="_blank" rel="noopener" class="action-button"><i class="fa-brands fa-telegram"></i> Click Here To Join Telegram</a></div>
-                    <div class="info-card"><h2><i class="fa-solid fa-link"></i> Copy Link & Share</h2><button class="action-button" id="shareButton"><i class="fa-solid fa-share-nodes"></i> Click Here To Share This Page Link</button></div>
+                    <div class="info-card"><h2><i class="fa-solid fa-bell" aria-hidden="true"></i> Follow us for Updates!</h2><a href="https://t.me/+e9BLe1TuBBIxN2U1" target="_blank" rel="noopener noreferrer" class="action-button"><i class="fa-brands fa-telegram" aria-hidden="true"></i> Join Telegram</a></div>
+                    <div class="info-card"><h2><i class="fa-solid fa-link" aria-hidden="true"></i> Copy Link & Share</h2><button class="action-button" id="shareButton" aria-label="Copy page link to clipboard"><i class="fa-solid fa-share-nodes" aria-hidden="true"></i> Share Link</button></div>
                 </div>
-                <a href="#" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to All Streams</a>
+                <a href="./" class="back-link"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back to All Streams</a>
             `;
             document.getElementById('shareButton').addEventListener('click', copyAndShare);
         }
@@ -305,7 +381,7 @@
         function renderErrorUI(title = "Stream Not Found", message = "The requested stream is unavailable.") {
             const contentDiv = document.getElementById('stream-content');
             document.title = `Error - ${title}`;
-            contentDiv.innerHTML = `<div class="error-message"><h2><i class="fa-solid fa-triangle-exclamation"></i> ${title}</h2><p>${message}</p><a href="#" class="back-link" style="margin-top: 2rem;"><i class="fa-solid fa-arrow-left"></i> Back to All Streams</a></div>`;
+            contentDiv.innerHTML = `<div class="error-message" role="alert"><h2><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> ${title}</h2><p>${message}</p><a href="./" class="back-link" style="margin-top: 2rem;"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back to All Streams</a></div>`;
         }
 
         // ========== NEW SHAKA PLAYER (v4.7.11) LOGIC ==========
@@ -414,9 +490,7 @@
             });
 
             video.addEventListener('play', () => {
-                if (window.self === window.top && !document.fullscreenElement && window.innerWidth <= 768) {
-                    container.requestFullscreen().catch(() => {});
-                }
+                // Removed automatic fullscreen for better user experience
             }, { once: true });
 
             video.addEventListener('loadedmetadata', () => {
@@ -461,7 +535,7 @@
             const originalHTML = shareButton.innerHTML;
             try {
                 await navigator.clipboard.writeText(window.location.href);
-                shareButton.innerHTML = `<i class="fa-solid fa-check"></i> Link Copied!`;
+                shareButton.innerHTML = `<i class="fa-solid fa-check" aria-hidden="true"></i> Link Copied!`;
                 shareButton.classList.add('copied');
                 setTimeout(() => { shareButton.innerHTML = originalHTML; shareButton.classList.remove('copied'); }, 2000);
             } catch (err) { console.error('Failed to copy link:', err); }
